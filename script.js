@@ -1,16 +1,10 @@
-// HTML에 canvas 요소가 있다고 가정하고, id는 'ladderCanvas'로 설정합니다.
-// 또한 게임을 시작하는 버튼이 있으며, onclick 이벤트로 drawLadder 함수를 호출합니다.
-
-// Canvas 설정
 const canvas = document.getElementById('ladderCanvas');
 const ctx = canvas.getContext('2d');
+const players = 4;
+const spacingX = canvas.width / (players + 1);
+const spacingY = 20;
+let horizontalLines = [];
 
-// 게임 설정
-const players = 4; // 플레이어 수
-const spacingX = canvas.width / (players + 1); // 세로선 간격
-const spacingY = 20; // 가로선 간격
-
-// 선을 그리는 함수
 function drawLine(startX, startY, endX, endY) {
     ctx.beginPath();
     ctx.moveTo(startX, startY);
@@ -18,40 +12,54 @@ function drawLine(startX, startY, endX, endY) {
     ctx.stroke();
 }
 
-// 사다리를 그리는 함수
 function drawLadder() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // 캔버스 클리어
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    horizontalLines = Array.from({ length: canvas.height / spacingY }, () => []);
 
     // 세로선 그리기
     for (let i = 1; i <= players; i++) {
         drawLine(spacingX * i, 0, spacingX * i, canvas.height);
     }
 
-    // 가로선 그리기 - 중복 없이
-    let prevHorizontalLines = Array(players - 1).fill(false);
+    // 가로선 랜덤하게 그리기
     for (let y = spacingY; y < canvas.height; y += spacingY) {
-        for (let i = 0; i < players - 1; i++) {
-            if (Math.random() > 0.5 && !prevHorizontalLines[i]) {
-                drawLine(spacingX * (i + 1), y, spacingX * (i + 2), y);
-                prevHorizontalLines[i] = true; // 현재 줄에 가로선이 그려짐을 표시
-            } else {
-                prevHorizontalLines[i] = false; // 가로선이 그려지지 않음
+        let possiblePositions = [];
+        for (let i = 1; i < players; i++) {
+            if (!horizontalLines[y / spacingY - 1].includes(i)) {
+                possiblePositions.push(i);
             }
+        }
+        let linePosition = possiblePositions[Math.floor(Math.random() * possiblePositions.length)];
+        if (linePosition !== undefined) {
+            drawLine(spacingX * linePosition, y, spacingX * (linePosition + 1), y);
+            horizontalLines[y / spacingY].push(linePosition);
         }
     }
 }
 
-// 결과 계산 함수
 function getLadderResult() {
-    // ... 기존의 getLadderResult 함수 코드 ...
+    const results = [];
+    for (let i = 0; i < players; i++) {
+        let position = i; // 플레이어의 시작 위치
+        for (let y = spacingY; y <= canvas.height; y += spacingY) {
+            if (horizontalLines[y / spacingY] && horizontalLines[y / spacingY].includes(position)) {
+                position++; // 오른쪽으로 이동
+            } else if (horizontalLines[y / spacingY] && horizontalLines[y / spacingY].includes(position - 1)) {
+                position--; // 왼쪽으로 이동
+            }
+        }
+        results.push(position); // 최종 결과 위치 저장
+    }
+    return results; // 모든 플레이어의 결과 반환
 }
 
-// 결과 표시 함수
 function showResult() {
-    // ... 기존의 showResult 함수 코드 ...
+    const results = getLadderResult();
+    const resultText = results.map((pos, idx) => `플레이어 ${idx + 1}의 최종 위치: ${pos + 1}`).join("\n");
+    alert(resultText); // 결과 텍스트를 알림으로 표시
 }
 
-// 게임 시작 버튼 이벤트 리스너
+// 게임 시작 버튼에 결과 표시 기능 추가
 document.querySelector("button").onclick = function() {
     drawLadder();
     setTimeout(showResult, 500); // 사다리 그리기 후 결과 표시
