@@ -1,5 +1,8 @@
 const canvas = document.getElementById('ladderCanvas');
 const ctx = canvas.getContext('2d');
+const players = 4;
+const spacingX = canvas.width / (players + 1);
+const spacingY = 20;
 
 function drawLine(startX, startY, endX, endY) {
     ctx.beginPath();
@@ -10,10 +13,6 @@ function drawLine(startX, startY, endX, endY) {
 
 function drawLadder() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const players = 4;
-    const spacingX = canvas.width / (players + 1);
-    const spacingY = 20;
-    let currentY = 0;
 
     // 세로선 그리기
     for (let i = 1; i <= players; i++) {
@@ -21,17 +20,23 @@ function drawLadder() {
     }
 
     // 가로선 랜덤하게 그리기
-    while (currentY < canvas.height) {
-        let prevX = spacingX;
-        for (let i = 2; i <= players; i++) {
-            if (Math.random() > 0.5) {
-                drawLine(prevX, currentY, spacingX * i, currentY);
+    for (let y = spacingY; y < canvas.height; y += spacingY) {
+        let lineStart = -1;
+        for (let i = 1; i <= players; i++) {
+            if (Math.random() > 0.5 && lineStart < 0) {
+                lineStart = i;
+            } else if (lineStart > 0) {
+                drawLine(spacingX * lineStart, y, spacingX * i, y);
+                lineStart = -1; // Reset lineStart after drawing a line
             }
-            prevX = spacingX * i;
         }
-        currentY += spacingY;
     }
 }
+
+document.querySelector("button").onclick = function() {
+    drawLadder();
+};
+
 
 // 초기 사다리 그리기
 drawLadder();
