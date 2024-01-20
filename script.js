@@ -34,37 +34,29 @@ function determineHorizontalLines() {
 
 function drawLadder() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    let usedPositions = new Set(); // 이미 사용된 세로선 사이 위치 추적
+
+    // 가로선이 있는 위치를 추적하기 위한 배열 초기화
+    let horizontalLinePositions = new Array(players - 1).fill(false);
 
     // 세로선 그리기
     for (let i = 1; i <= players; i++) {
         drawLine(spacingX * i, 0, spacingX * i, canvas.height);
     }
 
-    // 가로선 랜덤하게 그리기
+    // 가로선 그리기
     for (let y = spacingY; y < canvas.height; y += spacingY) {
-        // 각 층마다 가능한 시작점 배열 생성
-        let possibleStarts = [];
-        for (let i = 1; i < players; i++) {
-            if (!usedPositions.has(i)) {
-                possibleStarts.push(i);
+        for (let i = 0; i < players - 1; i++) {
+            // 이전 행에 가로선이 없고, 랜덤하게 결정된 경우에만 가로선을 그림
+            if (!horizontalLinePositions[i] && Math.random() > 0.5) {
+                drawLine(spacingX * (i + 1), y, spacingX * (i + 2), y);
+                horizontalLinePositions[i] = true; // 가로선을 그렸다고 표시
+            } else {
+                horizontalLinePositions[i] = false; // 가로선이 없다고 표시
             }
-        }
-        
-        if (possibleStarts.length > 0) {
-            // 가능한 시작점 중 하나를 랜덤하게 선택
-            let startPosition = possibleStarts[Math.floor(Math.random() * possibleStarts.length)];
-            drawLine(spacingX * startPosition, y, spacingX * (startPosition + 1), y);
-            // 선택된 위치를 사용된 위치로 추가
-            usedPositions.add(startPosition);
-        }
-        
-        // 다음 층을 위해 사용된 위치 초기화
-        if (y / spacingY % 2 === 1) {
-            usedPositions.clear();
         }
     }
 }
+
 
 
 function getLadderResult() {
