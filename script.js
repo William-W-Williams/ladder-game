@@ -34,9 +34,7 @@ function determineHorizontalLines() {
 
 function drawLadder() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // 가로선이 있는 위치를 추적하기 위한 배열 초기화
-    let horizontalLinePositions = new Array(players - 1).fill(false);
+    let hasLine = new Array(players - 1).fill(false); // 이전 행의 가로줄 여부
 
     // 세로선 그리기
     for (let i = 1; i <= players; i++) {
@@ -46,12 +44,12 @@ function drawLadder() {
     // 가로선 그리기
     for (let y = spacingY; y < canvas.height; y += spacingY) {
         for (let i = 0; i < players - 1; i++) {
-            // 이전 행에 가로선이 없고, 랜덤하게 결정된 경우에만 가로선을 그림
-            if (!horizontalLinePositions[i] && Math.random() > 0.5) {
+            // 현재 위치에 가로줄이 없고, 랜덤 조건을 충족하면 가로줄을 그림
+            if (!hasLine[i] && Math.random() > 0.5) {
                 drawLine(spacingX * (i + 1), y, spacingX * (i + 2), y);
-                horizontalLinePositions[i] = true; // 가로선을 그렸다고 표시
+                hasLine[i] = true; // 현재 행에 가로줄을 그렸다고 표시
             } else {
-                horizontalLinePositions[i] = false; // 가로선이 없다고 표시
+                hasLine[i] = false; // 가로줄이 없다고 표시
             }
         }
     }
