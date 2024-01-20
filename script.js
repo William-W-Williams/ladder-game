@@ -35,3 +35,32 @@ function drawLadder() {
 
 // 초기 사다리 그리기
 drawLadder();
+
+// ... 이전 drawLadder 함수 유지 ...
+
+function getLadderResult() {
+    const results = [];
+    for (let i = 0; i < 4; i++) {
+        let position = i;
+        for (let y = 0; y < canvas.height; y += spacingY) {
+            if (position > 0 && ctx.getImageData(spacingX * position - 10, y, 1, 1).data[3] !== 0) {
+                position--;
+            } else if (position < 3 && ctx.getImageData(spacingX * (position + 1) + 10, y, 1, 1).data[3] !== 0) {
+                position++;
+            }
+        }
+        results.push(position);
+    }
+    return results;
+}
+
+function showResult() {
+    const results = getLadderResult();
+    alert("결과: " + results.map((pos, idx) => `플레이어 ${idx + 1} -> 위치 ${pos + 1}`).join(", "));
+}
+
+// 게임 시작 버튼에 결과 표시 기능 추가
+document.querySelector("button").onclick = function() {
+    drawLadder();
+    setTimeout(showResult, 500);
+};
