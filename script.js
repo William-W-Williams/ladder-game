@@ -34,7 +34,7 @@ function determineHorizontalLines() {
 
 function drawLadder() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    horizontalLines = Array.from({ length: canvas.height / spacingY }, () => []);
+    let usedPositions = new Set(); // 이미 사용된 세로선 사이 위치 추적
 
     // 세로선 그리기
     for (let i = 1; i <= players; i++) {
@@ -43,14 +43,25 @@ function drawLadder() {
 
     // 가로선 랜덤하게 그리기
     for (let y = spacingY; y < canvas.height; y += spacingY) {
-        let previousLine = false; // 이전 가로선의 위치를 추적
+        // 각 층마다 가능한 시작점 배열 생성
+        let possibleStarts = [];
         for (let i = 1; i < players; i++) {
-            if (Math.random() > 0.5 && !previousLine) {
-                drawLine(spacingX * i, y, spacingX * (i + 1), y);
-                previousLine = true; // 가로선을 그렸으므로 플래그 설정
-            } else {
-                previousLine = false; // 플래그 초기화
+            if (!usedPositions.has(i)) {
+                possibleStarts.push(i);
             }
+        }
+        
+        if (possibleStarts.length > 0) {
+            // 가능한 시작점 중 하나를 랜덤하게 선택
+            let startPosition = possibleStarts[Math.floor(Math.random() * possibleStarts.length)];
+            drawLine(spacingX * startPosition, y, spacingX * (startPosition + 1), y);
+            // 선택된 위치를 사용된 위치로 추가
+            usedPositions.add(startPosition);
+        }
+        
+        // 다음 층을 위해 사용된 위치 초기화
+        if (y / spacingY % 2 === 1) {
+            usedPositions.clear();
         }
     }
 }
